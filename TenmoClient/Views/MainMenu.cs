@@ -8,6 +8,7 @@ namespace TenmoClient.Views
 {
     public class MainMenu : ConsoleMenu
     {
+        private readonly static string API_BASE_URL = "https://localhost:44315/";
 
         public MainMenu()
         { 
