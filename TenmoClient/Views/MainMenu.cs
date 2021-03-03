@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TenmoClient.DAL;
 using TenmoClient.Data;
 
 namespace TenmoClient.Views
@@ -9,9 +10,12 @@ namespace TenmoClient.Views
     public class MainMenu : ConsoleMenu
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
+        private readonly API_User User = null;
 
-        public MainMenu()
-        { 
+        public MainMenu(API_User user)
+        {
+            this.User = user;
+
             AddOption("View your current balance", ViewBalance)
                 .AddOption("View your past transfers", ViewTransfers)
                 .AddOption("View your pending requests", ViewRequests)
@@ -28,7 +32,14 @@ namespace TenmoClient.Views
 
         private MenuOptionResult ViewBalance()
         {
-            Console.WriteLine("Not yet implemented!");
+            AccountApiDao acc = new AccountApiDao(API_BASE_URL);
+            List<Account> list = acc.GetAccounts(User.UserId);
+
+            foreach (Account a in list)
+            {
+                Console.WriteLine($"{a.Balance}, {a.AccountId}");
+            }
+            
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
