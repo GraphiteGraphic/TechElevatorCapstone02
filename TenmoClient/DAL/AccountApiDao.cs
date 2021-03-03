@@ -1,4 +1,5 @@
 ﻿using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,9 +10,14 @@ namespace TenmoClient.DAL
     public class AccountApiDao : IAccount
     {
         private RestClient client;
-        public AccountApiDao(string api_url)
+        private API_User User;
+
+        public AccountApiDao(string api_url, API_User user)
         {
             client = new RestClient(api_url);
+            User = user;
+            client.Authenticator = new JwtAuthenticator(User.Token);
+
         }
         public List<Account> GetAccounts (int user_id)
         {
@@ -20,5 +26,11 @@ namespace TenmoClient.DAL
             return accountResponse.Data;
         }
 
+        public Decimal TransferMoney(int from_account, int to_account, decimal amount)
+        {
+            RestRequest request = new RestRequest($"account/{from_account}/{to_account}/{amount}", DataFormat.Json);
+            IRestResponse<Decimal> response = client.Post<Decimal>(request);
+            return response.Data;
+        }
     }
 }

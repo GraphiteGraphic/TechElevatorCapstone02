@@ -34,10 +34,10 @@ namespace TenmoServer.Controllers
             return NotFound();
         }
 
-        [HttpPost("{userID}/{accountID)")]
-        public IActionResult TransferMoney(int account_from, int account_to, decimal amount)
+        [HttpPost("{account_from}/{account_to}/{amount}")]
+        public IActionResult TransferMoney(int account_to, int account_from, decimal amount)
         { 
-            decimal money = accountDAO.TransferMoney(account_from, account_to, amount);
+            decimal money = accountDAO.TransferMoney(account_to, account_from, amount);
             if (money >= 0)
             {
                 return Ok(money);
