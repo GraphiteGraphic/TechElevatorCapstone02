@@ -1,16 +1,23 @@
 ﻿using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TenmoClient.Data;
 
 namespace TenmoClient.DAL
-{
+{  
     class UserApiDao
     {
         private RestClient client;
-        public UserApiDao(string api_url)
+        private API_User User;
+
+        public UserApiDao(string api_url, API_User user)
         {
             client = new RestClient(api_url);
+            User = user;
+            client.Authenticator = new JwtAuthenticator(User.Token);
+
         }
         public Dictionary<int, string> GetUsers()
         {

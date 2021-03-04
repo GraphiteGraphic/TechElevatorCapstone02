@@ -45,7 +45,22 @@ namespace TenmoClient.Views
 
         private MenuOptionResult ViewTransfers()
         {
-            Console.WriteLine("Not yet implemented!");
+            TransferApiDao tran = new TransferApiDao(API_BASE_URL, User);
+            Dictionary<int, Transfer> list = tran.GetTransfers(User.UserId);
+
+            foreach (KeyValuePair<int, Transfer> t in list)
+            {
+                Console.WriteLine($"{t.Value.ToString()}");
+            }
+
+            int eyedee = GetInteger("To view more details, input transfer ID #: ", 0);
+            while (!list.ContainsKey(eyedee))
+            {
+             Console.WriteLine($"Error: Invalid Input.");
+             eyedee = GetInteger("To view more details, input transfer ID #: ", 0);
+            }
+            Console.WriteLine($"{list[eyedee]}");
+
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
@@ -57,7 +72,7 @@ namespace TenmoClient.Views
 
         private MenuOptionResult SendTEBucks()
         {
-            UserApiDao u = new UserApiDao(API_BASE_URL);
+            UserApiDao u = new UserApiDao(API_BASE_URL, User);
             
             //Attempt to use submenu to select transfer target
             //UserSelectionMenu selection = new UserSelectionMenu(u.GetUsers(), User.Username);
@@ -66,7 +81,7 @@ namespace TenmoClient.Views
             Dictionary<int, string> names = u.GetUsers();
             foreach(KeyValuePair<int, string> kvp in names)
             {
-                Console.WriteLine($"{kvp.Key}||       {kvp.Value}");
+                Console.WriteLine($"{kvp.Key} ||  {kvp.Value}");
             }
 
             int toAccount = 0;
