@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TenmoClient.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TenmoClient.Views
 {
@@ -10,7 +12,7 @@ namespace TenmoClient.Views
     public class LoginRegisterMenu : ConsoleMenu
     {
         private readonly AuthService authService;
-
+        private ConsoleServices consoleServices = new ConsoleServices();
         public LoginRegisterMenu(AuthService authService)
         {
             this.authService = authService;
@@ -18,6 +20,12 @@ namespace TenmoClient.Views
             AddOption("Login", Login)
                 .AddOption("Register", Register)
                 .AddOption("Exit", Exit);
+
+            Configure(cfg =>
+            {
+                cfg.ItemForegroundColor = ConsoleColor.Blue;
+                cfg.SelectedItemForegroundColor = ConsoleColor.White;
+            });
         }
 
         private MenuOptionResult Login()
@@ -37,7 +45,7 @@ namespace TenmoClient.Views
                 user = authService.Login(loginUser);
                 if (user == null)
                 {
-                    Console.WriteLine("Username or password is not valid.");
+                    consoleServices.ErrorMessage();
                 }
             }
             UserService.SetLogin(user);
@@ -72,7 +80,24 @@ namespace TenmoClient.Views
 
         protected override void OnBeforeShow()
         {
-            Console.WriteLine("Welcome to TEnmo!");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Jingle();
+            Console.WriteLine(@"     #     #                                                                         #######  #######                          ###");
+            Console.WriteLine(@"     #  #  #  ######  #        ####    ####   #    #  ######      #####   ####          #     #        #    #  #    #   ####   ###");
+            Console.WriteLine(@"     #  #  #  #       #       #    #  #    #  ##  ##  #             #    #    #         #     #        ##   #  ##  ##  #    #  ###");
+            Console.WriteLine(@"     #  #  #  #####   #       #       #    #  # ## #  #####         #    #    #         #     #####    # #  #  # ## #  #    #   #");
+            Console.WriteLine(@"     #  #  #  #       #       #       #    #  #    #  #             #    #    #         #     #        #  # #  #    #  #    #      ");
+            Console.WriteLine(@"     #  #  #  #       #       #    #  #    #  #    #  #             #    #    #         #     #        #   ##  #    #  #    #  ###");
+            Console.WriteLine(@"      ## ##   ######  ######   ####    ####   #    #  ######        #     ####          #     #######  #    #  #    #   ####   ###");
+            Console.WriteLine();
+
+        }
+
+        public void Jingle()
+        {
+            Task.Run(() => Console.Beep(1568, 500));
+            Task.Run(() => Console.Beep(2637, 500));
+            Task.Run(() => Console.Beep(2093, 800));
         }
 
         #region Console Helper Functions

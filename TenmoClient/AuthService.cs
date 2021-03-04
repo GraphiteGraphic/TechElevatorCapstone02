@@ -26,11 +26,18 @@ namespace TenmoClient
             {
                 if (!string.IsNullOrWhiteSpace(response.Data.Message))
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("An error message was received: " + response.Data.Message);
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Blue;
                 }
                 else
                 {
                     Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
+                    Console.WriteLine();
+                    Console.WriteLine();
                 }
                 return false;
             }

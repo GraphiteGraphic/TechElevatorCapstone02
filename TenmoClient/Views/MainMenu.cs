@@ -9,6 +9,7 @@ namespace TenmoClient.Views
 {
     public class MainMenu : ConsoleMenu
     {
+
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly API_User User = null;
         private ConsoleServices consoleServices = new ConsoleServices();
@@ -24,6 +25,12 @@ namespace TenmoClient.Views
                 .AddOption("Request TE bucks", RequestTEBucks)
                 .AddOption("Log in as different user", Logout)
                 .AddOption("Exit", Exit);
+
+            Configure(cfg =>
+            {
+                cfg.ItemForegroundColor = ConsoleColor.Blue;
+                cfg.SelectedItemForegroundColor = ConsoleColor.White;
+            });
         }
 
         protected override void OnBeforeShow()
@@ -47,7 +54,8 @@ namespace TenmoClient.Views
             Dictionary<int, Transfer> list = tran.GetTransfers();
 
             consoleServices.PrintTransfers(list);
-
+            Console.WriteLine();
+            Console.WriteLine( );
             int transId = GetInteger("To view more details, input transfer ID #: ", 0);
             if (transId == 0)
             {
@@ -55,11 +63,12 @@ namespace TenmoClient.Views
             }
             while (!list.ContainsKey(transId))
             {
-                Console.WriteLine($"Error: Invalid Input.");
+                consoleServices.ErrorMessage();
                 transId = GetInteger("To view more details, input transfer ID #: ", 0);
             }
-            Console.WriteLine($"{list[transId]}");
-
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"{list[transId].TransferID}      -->      name    ${list[transId].Amount}");
+            Console.ForegroundColor = ConsoleColor.Blue;
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
@@ -87,7 +96,7 @@ namespace TenmoClient.Views
                 
                 if (!names.ContainsKey(toAccount))
                 {
-                    Console.WriteLine("Error: Invalid ID");
+                    consoleServices.ErrorMessage();
                 }
             }
 
@@ -101,7 +110,7 @@ namespace TenmoClient.Views
             {
                 if (amount <= 0)
                 {
-                    Console.WriteLine("Error: Cannot transfer $0 or less");
+                    consoleServices.ErrorMessage();
                 }
                 else if (amount > list[0].Balance)
                 {
