@@ -21,9 +21,10 @@ namespace TenmoServer.Controllers
             this.accountDAO = accountDAO;
         }
 
-        [HttpGet("{userId}")]
-        public IActionResult GetAccounts(int userId)
+        [HttpGet]
+        public ActionResult<int> GetAccounts()
         {
+            int userId = int.Parse(User.FindFirst("sub").Value);
             List<Account> accounts = accountDAO.GetAccounts(userId);
 
             if (accounts != null)
@@ -31,17 +32,6 @@ namespace TenmoServer.Controllers
                 return Ok(accounts);
             }
 
-            return NotFound();
-        }
-
-        [HttpPost("{account_from}/{account_to}/{amount}")]
-        public IActionResult TransferMoney(int account_to, int account_from, decimal amount)
-        { 
-            decimal money = accountDAO.TransferMoney(account_to, account_from, amount);
-            if (money >= 0)
-            {
-                return Ok(money);
-            }
             return NotFound();
         }
     }

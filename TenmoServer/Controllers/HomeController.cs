@@ -9,7 +9,7 @@ namespace TenmoServer.Controllers
 {
     [Route("/")]
     [ApiController]
-    public class ExampleController : ControllerBase
+    public class HomeController : ControllerBase
     {
         [HttpGet]
         public object Home()

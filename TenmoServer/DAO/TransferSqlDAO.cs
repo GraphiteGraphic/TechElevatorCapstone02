@@ -50,7 +50,38 @@ namespace TenmoServer.DAO
             }
 
             return list;
+        }
 
+        public decimal TransferMoney(Transfer transfer)
+        {
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand
+                        (@"BEGIN TRANSACTION
+                        INSERT into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount)
+                        VALUES (2, 2, @account_from, @account_to, @amount)
+                        UPDATE accounts SET balance = balance + @amount WHERE account_id = @account_to
+                        UPDATE accounts SET balance = balance - @amount WHERE account_id = @account_from
+                        COMMIT TRANSACTION
+                        SELECT balance FROM accounts WHERE account_id = @account_from", conn);
+
+                    cmd.Parameters.AddWithValue("@account_to", transfer.AccountTo);
+                    cmd.Parameters.AddWithValue("@account_from", transfer.AccountFrom);
+                    cmd.Parameters.AddWithValue("@amount", transfer.Amount);
+
+                    decimal newBal = (decimal)cmd.ExecuteScalar();
+                    return newBal;
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
         }
     }
 }

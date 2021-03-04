@@ -7,6 +7,6 @@ namespace TenmoClient.DAL
 {
     public interface IAccount
     {
-        List<Account> GetAccounts(int user_id);
+        List<Account> GetAccounts();
     }
 }

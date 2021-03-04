@@ -11,6 +11,7 @@ namespace TenmoClient.Views
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly API_User User = null;
+        private ConsoleServices consoleServices = new ConsoleServices();
 
         public MainMenu(API_User user)
         {
@@ -33,12 +34,9 @@ namespace TenmoClient.Views
         private MenuOptionResult ViewBalance()
         {
             AccountApiDao acc = new AccountApiDao(API_BASE_URL, User);
-            List<Account> list = acc.GetAccounts(User.UserId);
+            List<Account> list = acc.GetAccounts();
 
-            foreach (Account a in list)
-            {
-                Console.WriteLine($"{a.Balance}, {a.AccountId}");
-            }
+            consoleServices.PrintBalance(list);
             
             return MenuOptionResult.WaitAfterMenuSelection;
         }
@@ -46,20 +44,21 @@ namespace TenmoClient.Views
         private MenuOptionResult ViewTransfers()
         {
             TransferApiDao tran = new TransferApiDao(API_BASE_URL, User);
-            Dictionary<int, Transfer> list = tran.GetTransfers(User.UserId);
+            Dictionary<int, Transfer> list = tran.GetTransfers();
 
-            foreach (KeyValuePair<int, Transfer> t in list)
-            {
-                Console.WriteLine($"{t.Value.ToString()}");
-            }
+            consoleServices.PrintTransfers(list);
 
-            int eyedee = GetInteger("To view more details, input transfer ID #: ", 0);
-            while (!list.ContainsKey(eyedee))
+            int transId = GetInteger("To view more details, input transfer ID #: ", 0);
+            if (transId == 0)
             {
-             Console.WriteLine($"Error: Invalid Input.");
-             eyedee = GetInteger("To view more details, input transfer ID #: ", 0);
+                return MenuOptionResult.DoNotWaitAfterMenuSelection;
             }
-            Console.WriteLine($"{list[eyedee]}");
+            while (!list.ContainsKey(transId))
+            {
+                Console.WriteLine($"Error: Invalid Input.");
+                transId = GetInteger("To view more details, input transfer ID #: ", 0);
+            }
+            Console.WriteLine($"{list[transId]}");
 
             return MenuOptionResult.WaitAfterMenuSelection;
         }
@@ -79,10 +78,7 @@ namespace TenmoClient.Views
             //selection.Show();
 
             Dictionary<int, string> names = u.GetUsers();
-            foreach(KeyValuePair<int, string> kvp in names)
-            {
-                Console.WriteLine($"{kvp.Key} ||  {kvp.Value}");
-            }
+            consoleServices.PrintUsers(names, User);
 
             int toAccount = 0;
             while (!names.ContainsKey(toAccount))
@@ -96,19 +92,16 @@ namespace TenmoClient.Views
             }
 
             AccountApiDao acc = new AccountApiDao(API_BASE_URL, User);
-            List<Account> list = acc.GetAccounts(User.UserId);
+            List<Account> list = acc.GetAccounts();
 
-            foreach (Account a in list)
-            {
-                Console.WriteLine($"Current Balance|| ${a.Balance}");
-            }
+            consoleServices.PrintBalance(list);
 
             decimal amount = GetDecimal("\nEnter amount to transfer: ");
-            while(amount > list[0].Balance || amount == 0)
+            while(amount > list[0].Balance || amount <= 0)
             {
-                if (amount == 0)
+                if (amount <= 0)
                 {
-                    Console.WriteLine("Error: Cannot transfer $0");
+                    Console.WriteLine("Error: Cannot transfer $0 or less");
                 }
                 else if (amount > list[0].Balance)
                 {
@@ -117,8 +110,11 @@ namespace TenmoClient.Views
 
                 amount = GetDecimal("\nEnter amount to transfer: ");
             }
-            
-            acc.TransferMoney(list[0].AccountId, toAccount, amount);
+
+            TransferApiDao trans = new TransferApiDao(API_BASE_URL, User);
+            decimal newBal = trans.TransferMoney(list[0].AccountId, toAccount, amount, list[0].Balance);
+
+            consoleServices.TransferComplete(newBal);
 
             return MenuOptionResult.WaitAfterMenuSelection;
         }
