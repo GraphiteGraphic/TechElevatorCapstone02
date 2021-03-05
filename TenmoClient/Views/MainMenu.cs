@@ -53,7 +53,7 @@ namespace TenmoClient.Views
             TransferApiDao tran = new TransferApiDao(API_BASE_URL, User);
             Dictionary<int, Transfer> list = tran.GetTransfers();
 
-            consoleServices.PrintTransfers(list);
+            consoleServices.PrintTransfers(list, User);
             Console.WriteLine();
             Console.WriteLine( );
             int transId = GetInteger("To view more details, input transfer ID #: ", 0);
@@ -66,9 +66,9 @@ namespace TenmoClient.Views
                 consoleServices.ErrorMessage();
                 transId = GetInteger("To view more details, input transfer ID #: ", 0);
             }
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"{list[transId].TransferID}      -->      name    ${list[transId].Amount}");
-            Console.ForegroundColor = ConsoleColor.Blue;
+
+            consoleServices.TransferDetails(list[transId], User);
+
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
