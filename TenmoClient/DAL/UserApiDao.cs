@@ -19,10 +19,10 @@ namespace TenmoClient.DAL
             client.Authenticator = new JwtAuthenticator(User.Token);
 
         }
-        public Dictionary<int, string> GetUsers()
+        public List<API_User> GetUsers()
         {
             RestRequest request = new RestRequest($"user", DataFormat.Json);
-            IRestResponse<Dictionary<int, string>> accountResponse = client.Get<Dictionary<int, string>>(request);   // This de-serializes json into Exchange
+            IRestResponse<List<API_User>> accountResponse = client.Get<List<API_User>>(request);   // This de-serializes json into Exchange
             return accountResponse.Data;
         }
     }

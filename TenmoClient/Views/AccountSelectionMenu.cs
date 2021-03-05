@@ -6,20 +6,19 @@ using TenmoClient.Data;
 
 namespace TenmoClient.Views
 {
-    class UserSelectionMenu : ConsoleMenu
+    class AccountSelectionMenu : ConsoleMenu
     {
         private MainMenu parent;
-
-        public UserSelectionMenu(Dictionary<int, API_User> names, string username, MainMenu mainMenu)
+        private List<Account> accounts;
+        
+        public AccountSelectionMenu(List<Account> accounts, MainMenu mainMenu)
         {
             parent = mainMenu;
+            this.accounts = accounts;
 
-            foreach (KeyValuePair<int, API_User> kvp in names)
-            {
-                if (kvp.Value.Username != username)
-                {
-                    AddOption<int>(kvp.Value.Username, ReturnName, kvp.Key);
-                }
+            foreach (Account account in accounts)
+            { 
+                AddOption<Account>($"{account.AccountId}||   {account.Balance}", ReturnAccount, account);
             }
 
             AddOption("Exit", ExitSelect);
@@ -30,16 +29,16 @@ namespace TenmoClient.Views
             Console.WriteLine("Please Select the Recipient\n");
         }
 
-        private MenuOptionResult ReturnName(int selection)
+        private MenuOptionResult ReturnAccount(Account selection)
         {
-            parent.selectionId = selection;
+            parent.acctSelection = selection;
 
             return MenuOptionResult.CloseMenuAfterSelection;
         }
 
         private MenuOptionResult ExitSelect()
         {
-            parent.selectionId = 0;
+            parent.acctSelection = null;
 
             return MenuOptionResult.CloseMenuAfterSelection;
         }

@@ -22,20 +22,21 @@ namespace TenmoClient.DAL
         public Dictionary<int, Transfer> GetTransfers()
         {
             RestRequest request = new RestRequest();
-            IRestResponse<Dictionary<int, Transfer>> transferResponse = client.Get<Dictionary<int, Transfer>>(request);   // This de-serializes json into Exchange
-            return transferResponse.Data;
+            IRestResponse<List<Transfer>> transferResponse = client.Get<List<Transfer>>(request);   // This de-serializes json into Exchange
+
+            Dictionary<int, Transfer> transfers = new Dictionary<int, Transfer> { };
+            foreach(Transfer transfer in transferResponse.Data)
+            {
+                transfers.Add(transfer.TransferID, transfer);
+            }
+
+            return transfers;
         }
 
-        public Decimal TransferMoney(int from_account, int to_account, decimal amount, decimal balance)
+        public Decimal TransferMoney(Transfer newTransfer)
         {
             RestRequest request = new RestRequest();
             
-            Transfer newTransfer = new Transfer();
-            newTransfer.AccountFrom = from_account;
-            newTransfer.AccountTo = to_account;
-            newTransfer.Amount = amount;
-            newTransfer.AcctFromBal = balance;
-
             request.AddJsonBody(newTransfer);
             IRestResponse<Decimal> response = client.Post<Decimal>(request);
             return response.Data;

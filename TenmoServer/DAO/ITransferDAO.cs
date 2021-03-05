@@ -5,8 +5,10 @@ namespace TenmoServer.DAO
 {
     public interface ITransferDAO
     {
-        Dictionary<int, Transfer> GetTransfers(int user_id);
+        List<Transfer> GetTransfers(int user_id);
 
         decimal TransferMoney(Transfer transfer);
+
+        int RequestMoney(Transfer transfer);
     }
 }

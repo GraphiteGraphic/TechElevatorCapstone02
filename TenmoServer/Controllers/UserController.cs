@@ -26,17 +26,10 @@ namespace TenmoServer.Controllers
         public IActionResult GetAllUsers()
         {
             List<User> accounts = userDAO.GetUsers();
-
-            Dictionary<int, string> names = new Dictionary<int, string> { };
-
-            foreach(User u in accounts)
+           
+            if (accounts != null)
             {
-                names.Add(u.UserId, u.Username);
-            }
-
-            if (names != null)
-            {
-                return Ok(names);
+                return Ok(accounts);
             }
 
             return NotFound();

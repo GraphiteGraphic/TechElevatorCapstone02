@@ -9,7 +9,7 @@ namespace TenmoClient
 {
     class ConsoleServices
     {
-        public void PrintBalance(List<Account> list)
+        public void PrintAccounts(List<Account> list)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine(@"                                                                                                                                        ");
@@ -29,6 +29,10 @@ namespace TenmoClient
             }
         }
 
+        public void PrintBalance(Account account)
+        {
+            Console.WriteLine($"Current Balance: {account.Balance}");
+        }
 
         public void PrintTransfers(Dictionary<int, Transfer> transfers, API_User user)
         {
@@ -47,7 +51,7 @@ namespace TenmoClient
             foreach (KeyValuePair<int, Transfer> t in transfers)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                if (t.Value.AccountFrom == user.UserId)
+                if (t.Value.AccountFrom.AccountId == user.UserId)
                 {
                     Console.WriteLine($"{t.Key}      -->      {t.Value.ToUsername}    ${t.Value.Amount} ");
                 } else
@@ -67,15 +71,26 @@ namespace TenmoClient
             Console.ForegroundColor = ConsoleColor.Blue;
         }
 
-        public void PrintUsers(Dictionary<int, string> names, API_User user)
+        public Dictionary<int, API_User> NamesToDiction(List<API_User> list)
         {
-            foreach (KeyValuePair<int, string> kvp in names)
+            Dictionary<int, API_User> names = new Dictionary<int, API_User> { };
+            foreach (API_User name in list)
             {
-                if (kvp.Value == user.Username)
+                names.Add(name.UserId, name);
+            }
+
+            return names;
+        }
+
+        public void PrintUsers(List<API_User> names, API_User user)
+        {
+            foreach (API_User name in names)
+            {
+                if (name.Username == user.Username)
                 {
                     continue;
                 }
-                Console.WriteLine($"{kvp.Key} || {kvp.Value}");
+                Console.WriteLine($"{name.UserId} || {name.Username}");
             }
         }
 

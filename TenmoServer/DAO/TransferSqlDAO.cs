@@ -16,9 +16,9 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
-        public Dictionary<int, Transfer> GetTransfers(int user_id)
+        public List<Transfer> GetTransfers(int user_id)
         {
-            Dictionary<int, Transfer> list = new Dictionary<int, Transfer> { };
+            List<Transfer> list = new List<Transfer> { };
 
             try
             {
@@ -40,13 +40,13 @@ namespace TenmoServer.DAO
                         transfer.TransferID = Convert.ToInt32(reader["transfer_id"]);
                         transfer.TransferTypeID = Convert.ToInt32(reader["transfer_type_id"]);
                         transfer.TransferStatusID = Convert.ToInt32(reader["transfer_status_id"]);
-                        transfer.AccountFrom = Convert.ToInt32(reader["account_from"]);
-                        transfer.AccountTo = Convert.ToInt32(reader["account_to"]);
+                        transfer.AccountFrom.AccountId = Convert.ToInt32(reader["account_from"]);
+                        transfer.AccountTo.AccountId = Convert.ToInt32(reader["account_to"]);
                         transfer.Amount = Convert.ToDecimal(reader["amount"]);
                         transfer.FromUsername = Convert.ToString(reader["from_username"]);
                         transfer.ToUsername = Convert.ToString(reader["to_username"]);
 
-                        list.Add(transfer.TransferID, transfer);
+                        list.Add(transfer);
                     }
                 }
             }
@@ -70,18 +70,52 @@ namespace TenmoServer.DAO
                     SqlCommand cmd = new SqlCommand
                         (@"BEGIN TRANSACTION
                         INSERT into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount)
-                        VALUES (2, 2, @account_from, @account_to, @amount)
+                        VALUES (@transfer_type_id, @transfer_status_id, @account_from, @account_to, @amount)
                         UPDATE accounts SET balance = balance + @amount WHERE account_id = @account_to
                         UPDATE accounts SET balance = balance - @amount WHERE account_id = @account_from
                         COMMIT TRANSACTION
                         SELECT balance FROM accounts WHERE account_id = @account_from", conn);
 
+                    cmd.Parameters.AddWithValue("@account_to", transfer.AccountTo.AccountId);
+                    cmd.Parameters.AddWithValue("@account_from", transfer.AccountFrom.AccountId);
+                    cmd.Parameters.AddWithValue("@amount", transfer.Amount);
+                    cmd.Parameters.AddWithValue("@transfer_type_id", transfer.TransferTypeID);
+                    cmd.Parameters.AddWithValue("@transfer_status_id", transfer.TransferStatusID);
+                    
+                    decimal newBal = (decimal)cmd.ExecuteScalar();
+                    return newBal;
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+        }
+
+        public int RequestMoney(Transfer transfer)
+        {
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand
+                        (@"BEGIN TRANSACTION
+                        INSERT into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount)
+                        VALUES (@transfer_type_id, @transfer_status_id, @account_from, @account_to, @amount)
+                           SELECT @@IDENTITY
+                        COMMIT TRANSACTION", conn);
+
                     cmd.Parameters.AddWithValue("@account_to", transfer.AccountTo);
                     cmd.Parameters.AddWithValue("@account_from", transfer.AccountFrom);
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
+                    cmd.Parameters.AddWithValue("@transfer_type_id", transfer.TransferTypeID);
+                    cmd.Parameters.AddWithValue("@transfer_status_id", transfer.TransferStatusID);
 
-                    decimal newBal = (decimal)cmd.ExecuteScalar();
-                    return newBal;
+                    int newId = (int)cmd.ExecuteScalar();
+                    return newId;
                 }
             }
             catch (SqlException)

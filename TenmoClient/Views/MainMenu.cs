@@ -43,7 +43,7 @@ namespace TenmoClient.Views
             AccountApiDao acc = new AccountApiDao(API_BASE_URL, User);
             List<Account> list = acc.GetAccounts();
 
-            consoleServices.PrintBalance(list);
+            consoleServices.PrintAccounts(list);
             
             return MenuOptionResult.WaitAfterMenuSelection;
         }
@@ -78,41 +78,62 @@ namespace TenmoClient.Views
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
+        //These fields are only used in the following Method
+        public int selectionId = 0;
+        public Account acctSelection = null;
+
         private MenuOptionResult SendTEBucks()
         {
-            UserApiDao u = new UserApiDao(API_BASE_URL, User);
-            
-            //Attempt to use submenu to select transfer target
-            //UserSelectionMenu selection = new UserSelectionMenu(u.GetUsers(), User.Username);
-            //selection.Show();
+            //Creates new transfer object (defaults status to approved and type to sent)
+            Transfer newTransfer = new Transfer();
+            newTransfer.TransferStatusID = 2;
+            newTransfer.TransferTypeID = 2;
 
-            Dictionary<int, string> names = u.GetUsers();
-            consoleServices.PrintUsers(names, User);
+            UserApiDao u = new UserApiDao(API_BASE_URL, User);    
 
-            int toAccount = 0;
-            while (!names.ContainsKey(toAccount))
+            List<API_User> names = u.GetUsers();
+            Dictionary<int, API_User> users = consoleServices.NamesToDiction(names);
+
+            //User selects recipient
+            UserSelectionMenu selectMenu = new UserSelectionMenu(users, User.Username, this);
+            selectMenu.Show();
+
+            if (selectionId == 0)
             {
-                toAccount = GetInteger("\nPlease input the ID of the User you are sending TEBucks to: ");
-                
-                if (!names.ContainsKey(toAccount))
-                {
-                    consoleServices.ErrorMessage();
-                }
+                return MenuOptionResult.DoNotWaitAfterMenuSelection;
             }
 
+            newTransfer.AccountTo.AccountId = selectionId;
+
+            //User selects which balance to send from
             AccountApiDao acc = new AccountApiDao(API_BASE_URL, User);
             List<Account> list = acc.GetAccounts();
 
-            consoleServices.PrintBalance(list);
+            AccountSelectionMenu acctSelect = new AccountSelectionMenu(list, this);
+            acctSelect.Show();
 
-            decimal amount = GetDecimal("\nEnter amount to transfer: ");
-            while(amount > list[0].Balance || amount <= 0)
+            if (acctSelection == null)
             {
-                if (amount <= 0)
+                return MenuOptionResult.DoNotWaitAfterMenuSelection;
+            }
+
+            newTransfer.AccountFrom = acctSelection;
+
+            //User input amount of TE Bucks to send
+            consoleServices.PrintBalance(acctSelection);
+            decimal amount = GetDecimal("\nEnter amount to transfer: ", 0);
+            while(amount > acctSelection.Balance || amount <= 0)
+            {
+                if (amount < 0)
                 {
                     consoleServices.ErrorMessage();
                 }
-                else if (amount > list[0].Balance)
+                else if (amount == 0)
+                {
+                    Console.WriteLine("Transfer Cancelled");
+                    return MenuOptionResult.WaitAfterMenuSelection;
+                }
+                else if (amount > acctSelection.Balance)
                 {
                     Console.WriteLine("Error: Attempt to overdraft");
                 }
@@ -120,8 +141,10 @@ namespace TenmoClient.Views
                 amount = GetDecimal("\nEnter amount to transfer: ");
             }
 
+            newTransfer.Amount = amount;
+
             TransferApiDao trans = new TransferApiDao(API_BASE_URL, User);
-            decimal newBal = trans.TransferMoney(list[0].AccountId, toAccount, amount, list[0].Balance);
+            decimal newBal = trans.TransferMoney(newTransfer);
 
             consoleServices.TransferComplete(newBal);
 
@@ -130,6 +153,14 @@ namespace TenmoClient.Views
 
         private MenuOptionResult RequestTEBucks()
         {
+            //Logic follows similar to SendTEBucks
+                //Sub-menu for User selection
+                //Sub-menu for account selection
+                //Input amount to request (No check-logic required)
+                //TransferApiDao requires RequestMoney method
+                    //Generate transfer object and Post request (localhost:#####/transfer)
+                        //Modify TransferMoney to accept transfer status id and type id 
+
             Console.WriteLine("Not yet implemented!");
             return MenuOptionResult.WaitAfterMenuSelection;
         }

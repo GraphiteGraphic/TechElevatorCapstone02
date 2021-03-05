@@ -25,7 +25,7 @@ namespace TenmoServer.Controllers
         public IActionResult GetTransfers()
         {
             int userId = int.Parse(User.FindFirst("sub").Value);
-            Dictionary<int, Transfer> transfers = transferDAO.GetTransfers(userId);
+            List<Transfer> transfers = transferDAO.GetTransfers(userId);
 
             if (transfers != null)
             {
@@ -38,17 +38,26 @@ namespace TenmoServer.Controllers
         [HttpPost]
         public ActionResult<Transfer> TransferMoney(Transfer transfer)
         {
-            if (transfer.AccountFrom != int.Parse(User.FindFirst("sub").Value))
+            if (transfer.TransferTypeID == 2 && transfer.AccountFrom.AccountId != int.Parse(User.FindFirst("sub").Value))
             {
                 return Forbid();
             }
-            
-            if (transfer.AcctFromBal >= transfer.Amount && transfer.Amount > 0)
+            else if (transfer.TransferTypeID == 1 && transfer.AccountTo.AccountId != int.Parse(User.FindFirst("sub").Value))
+            {
+                return Forbid();
+            }
+
+            if (transfer.TransferTypeID == 2 && transfer.AccountFrom.Balance >= transfer.Amount && transfer.Amount > 0)
             {
                 decimal money = transferDAO.TransferMoney(transfer);
                 return Created("transfer",money);
             }
-            
+
+            if (transfer.TransferTypeID == 1)
+            {
+                return Created("transfer", transferDAO.RequestMoney(transfer));
+            }
+
             return BadRequest();
         }
     }
