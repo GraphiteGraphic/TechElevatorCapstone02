@@ -50,15 +50,35 @@ namespace TenmoClient
             Console.WriteLine("id    from/to   name    amount");
             foreach (KeyValuePair<int, Transfer> t in transfers)
             {
-                Console.ForegroundColor = ConsoleColor.White;
-                if (t.Value.AccountFrom.AccountId == user.UserId)
+                if (t.Value.TransferStatusID != 1)
                 {
-                    Console.WriteLine($"{t.Key}      -->      {t.Value.ToUsername}    ${t.Value.Amount} ");
-                } else
-                {
-                    Console.WriteLine($"{t.Key}      <--      {t.Value.FromUsername}    ${t.Value.Amount} ");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    if (t.Value.AccountFrom.AccountId == user.UserId)
+                    {
+                        Console.WriteLine($"{t.Key}      -->      {t.Value.ToUsername}    ${t.Value.Amount} ");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{t.Key}      <--      {t.Value.FromUsername}    ${t.Value.Amount} ");
+                    }
                 }
-                
+            }
+            Console.ForegroundColor = ConsoleColor.Blue;
+        }
+
+        public void PrintRequests(Dictionary<int, Transfer> transfers, API_User user)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("id       name    amount");
+            foreach (KeyValuePair<int, Transfer> t in transfers)
+            {
+                if (t.Value.TransferStatusID == 1 && t.Value.AccountFrom.AccountId == user.UserId)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine($"{t.Key}        {t.Value.ToUsername}    ${t.Value.Amount} ");
+                }
             }
             Console.ForegroundColor = ConsoleColor.Blue;
         }
@@ -92,6 +112,11 @@ namespace TenmoClient
                 }
                 Console.WriteLine($"{name.UserId} || {name.Username}");
             }
+        }
+
+        public void TransferRequest(int newId)
+        {
+            Console.WriteLine($"\n||Request Completed|| Transfer ID No. : {newId}");
         }
 
         public void TransferComplete(decimal newBal)

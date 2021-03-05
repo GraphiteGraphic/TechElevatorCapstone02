@@ -74,7 +74,10 @@ namespace TenmoClient.Views
 
         private MenuOptionResult ViewRequests()
         {
-            Console.WriteLine("Not yet implemented!");
+            TransferApiDao tran = new TransferApiDao(API_BASE_URL, User);
+            Dictionary<int, Transfer> list = tran.GetTransfers();
+
+            consoleServices.PrintRequests(list, User);
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
@@ -95,7 +98,7 @@ namespace TenmoClient.Views
             Dictionary<int, API_User> users = consoleServices.NamesToDiction(names);
 
             //User selects recipient
-            UserSelectionMenu selectMenu = new UserSelectionMenu(users, User.Username, this);
+            UserSelectionMenu selectMenu = new UserSelectionMenu(users, User.Username, this, newTransfer.TransferTypeID);
             selectMenu.Show();
 
             if (selectionId == 0)
@@ -109,7 +112,7 @@ namespace TenmoClient.Views
             AccountApiDao acc = new AccountApiDao(API_BASE_URL, User);
             List<Account> list = acc.GetAccounts();
 
-            AccountSelectionMenu acctSelect = new AccountSelectionMenu(list, this);
+            AccountSelectionMenu acctSelect = new AccountSelectionMenu(list, this, newTransfer.TransferTypeID);
             acctSelect.Show();
 
             if (acctSelection == null)
@@ -154,14 +157,71 @@ namespace TenmoClient.Views
         private MenuOptionResult RequestTEBucks()
         {
             //Logic follows similar to SendTEBucks
-                //Sub-menu for User selection
-                //Sub-menu for account selection
-                //Input amount to request (No check-logic required)
-                //TransferApiDao requires RequestMoney method
-                    //Generate transfer object and Post request (localhost:#####/transfer)
-                        //Modify TransferMoney to accept transfer status id and type id 
+            //Sub-menu for User selection
+            //Sub-menu for account selection
+            //Input amount to request (No check-logic required)
+            //TransferApiDao requires RequestMoney method
+            //Generate transfer object and Post request (localhost:#####/transfer)
+            //Modify TransferMoney to accept transfer status id and type id 
+            //Creates new transfer object (defaults status to approved and type to sent)
 
-            Console.WriteLine("Not yet implemented!");
+            Transfer newTransfer = new Transfer();
+            newTransfer.TransferStatusID = 1;
+            newTransfer.TransferTypeID = 1;
+
+            UserApiDao u = new UserApiDao(API_BASE_URL, User);
+
+            List<API_User> names = u.GetUsers();
+            Dictionary<int, API_User> users = consoleServices.NamesToDiction(names);
+
+            //User selects recipient
+            UserSelectionMenu selectMenu = new UserSelectionMenu(users, User.Username, this, newTransfer.TransferTypeID);
+            selectMenu.Show();
+
+            if (selectionId == 0)
+            {
+                return MenuOptionResult.DoNotWaitAfterMenuSelection;
+            }
+
+            newTransfer.AccountFrom.AccountId = selectionId;
+
+            //User selects which account to send to
+            AccountApiDao acc = new AccountApiDao(API_BASE_URL, User);
+            List<Account> list = acc.GetAccounts();
+
+            AccountSelectionMenu acctSelect = new AccountSelectionMenu(list, this, newTransfer.TransferTypeID);
+            acctSelect.Show();
+
+            if (acctSelection == null)
+            {
+                return MenuOptionResult.DoNotWaitAfterMenuSelection;
+            }
+
+            newTransfer.AccountTo = acctSelection;
+
+            //User input amount of TE Bucks to send
+            Decimal amount = GetDecimal("\nEnter amount to request: ", 0);
+            while (amount <= 0)
+            {
+                if (amount < 0)
+                {
+                    consoleServices.ErrorMessage();
+                }
+                else if (amount == 0)
+                {
+                    Console.WriteLine("Transfer Cancelled");
+                    return MenuOptionResult.WaitAfterMenuSelection;
+                }
+                amount = GetDecimal("\nEnter amount to transfer: ");
+            }
+
+            newTransfer.Amount = amount;
+
+            TransferApiDao trans = new TransferApiDao(API_BASE_URL, User);
+            int newId = (int)trans.TransferMoney(newTransfer);
+
+            consoleServices.TransferRequest(newId);
+
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 

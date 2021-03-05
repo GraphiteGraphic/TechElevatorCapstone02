@@ -108,13 +108,13 @@ namespace TenmoServer.DAO
                            SELECT @@IDENTITY
                         COMMIT TRANSACTION", conn);
 
-                    cmd.Parameters.AddWithValue("@account_to", transfer.AccountTo);
-                    cmd.Parameters.AddWithValue("@account_from", transfer.AccountFrom);
+                    cmd.Parameters.AddWithValue("@account_to", transfer.AccountTo.AccountId);
+                    cmd.Parameters.AddWithValue("@account_from", transfer.AccountFrom.AccountId);
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
                     cmd.Parameters.AddWithValue("@transfer_type_id", transfer.TransferTypeID);
                     cmd.Parameters.AddWithValue("@transfer_status_id", transfer.TransferStatusID);
 
-                    int newId = (int)cmd.ExecuteScalar();
+                    int newId = Convert.ToInt32(cmd.ExecuteScalar());
                     return newId;
                 }
             }

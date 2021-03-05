@@ -9,10 +9,12 @@ namespace TenmoClient.Views
     class UserSelectionMenu : ConsoleMenu
     {
         private MainMenu parent;
+        private int transferType;
 
-        public UserSelectionMenu(Dictionary<int, API_User> names, string username, MainMenu mainMenu)
+        public UserSelectionMenu(Dictionary<int, API_User> names, string username, MainMenu mainMenu, int transferType)
         {
             parent = mainMenu;
+            this.transferType = transferType;
 
             foreach (KeyValuePair<int, API_User> kvp in names)
             {
@@ -27,7 +29,14 @@ namespace TenmoClient.Views
 
         protected override void OnBeforeShow()
         {
-            Console.WriteLine("Please Select the Recipient\n");
+            if (transferType == 2)
+            {
+                Console.WriteLine("Please Select the Recipient\n");
+            }
+            else
+            {
+                Console.WriteLine("Please Select a User to Request from\n");
+            }
         }
 
         private MenuOptionResult ReturnName(int selection)

@@ -10,11 +10,13 @@ namespace TenmoClient.Views
     {
         private MainMenu parent;
         private List<Account> accounts;
+        private int transferType;
         
-        public AccountSelectionMenu(List<Account> accounts, MainMenu mainMenu)
+        public AccountSelectionMenu(List<Account> accounts, MainMenu mainMenu, int transferType)
         {
             parent = mainMenu;
             this.accounts = accounts;
+            this.transferType = transferType;
 
             foreach (Account account in accounts)
             { 
@@ -26,7 +28,14 @@ namespace TenmoClient.Views
 
         protected override void OnBeforeShow()
         {
-            Console.WriteLine("Please Select the Recipient\n");
+            if (transferType == 2)
+            {
+                Console.WriteLine("Please Select the Account to Send from\n");
+            }
+            else
+            {
+                Console.WriteLine("Please Select the Receiving Account\n");
+            }
         }
 
         private MenuOptionResult ReturnAccount(Account selection)
