@@ -50,18 +50,16 @@ namespace TenmoClient
             Console.WriteLine("id    from/to   name    amount");
             foreach (KeyValuePair<int, Transfer> t in transfers)
             {
-                if (t.Value.TransferStatusID != 1)
+                Console.ForegroundColor = ConsoleColor.White;
+                if (t.Value.AccountFrom.AccountId == user.UserId)
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    if (t.Value.AccountFrom.AccountId == user.UserId)
-                    {
-                        Console.WriteLine($"{t.Key}      -->      {t.Value.ToUsername}    ${t.Value.Amount} ");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{t.Key}      <--      {t.Value.FromUsername}    ${t.Value.Amount} ");
-                    }
+                    Console.WriteLine($"{t.Key}      -->      {t.Value.ToUsername}    ${t.Value.Amount} ");
                 }
+                else
+                {
+                    Console.WriteLine($"{t.Key}      <--      {t.Value.FromUsername}    ${t.Value.Amount} ");
+                }
+
             }
             Console.ForegroundColor = ConsoleColor.Blue;
         }
@@ -69,15 +67,15 @@ namespace TenmoClient
         public void PrintRequests(Dictionary<int, Transfer> transfers, API_User user)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            
+
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("id       name    amount");
+            Console.WriteLine("id       name     amount");
             foreach (KeyValuePair<int, Transfer> t in transfers)
             {
                 if (t.Value.TransferStatusID == 1 && t.Value.AccountFrom.AccountId == user.UserId)
                 {
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"{t.Key}        {t.Value.ToUsername}    ${t.Value.Amount} ");
+                    Console.WriteLine($"{t.Key}       {t.Value.ToUsername}     ${t.Value.Amount} ");
                 }
             }
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -87,7 +85,33 @@ namespace TenmoClient
         {
             Console.ForegroundColor = ConsoleColor.White;
 
-            Console.WriteLine($"{transfer.TransferID}||   {transfer.FromUsername}     -->      {transfer.ToUsername}    ${transfer.Amount}");
+            Console.WriteLine("---");
+            Console.WriteLine($"ID No. {transfer.TransferID}");
+            Console.WriteLine($"FROM: {transfer.FromUsername}");
+            Console.WriteLine($"TO: {transfer.ToUsername}");
+            if (transfer.TransferTypeID == 1)
+            {
+                Console.WriteLine("TYPE: REQUEST");
+            }
+            else
+            {
+                Console.WriteLine("TYPE: SEND");
+            }
+            if (transfer.TransferStatusID == 1)
+            {
+                Console.WriteLine("STATUS: PENDING");
+            }
+            else if (transfer.TransferStatusID == 2)
+            {
+                Console.WriteLine("STATUS: APPROVED");
+            }
+            else
+            {
+                Console.WriteLine("STATUS: REJECTED");
+            }
+            Console.WriteLine($"AMOUNT: ${transfer.Amount}");
+            Console.WriteLine($"---");
+
             Console.ForegroundColor = ConsoleColor.Blue;
         }
 
@@ -122,7 +146,7 @@ namespace TenmoClient
         public void TransferComplete(decimal newBal)
         {
             Task.Run(() => Console.Beep(1245, 100));
-            Task.Run(() => Console.Beep(1245, 100)); 
+            Task.Run(() => Console.Beep(1245, 100));
             Task.Run(() => Console.Beep(1245, 100));
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine();

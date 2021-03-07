@@ -54,22 +54,22 @@ namespace TenmoClient.Views
             Dictionary<int, Transfer> list = tran.GetTransfers();
 
             consoleServices.PrintTransfers(list, User);
-            Console.WriteLine();
-            Console.WriteLine( );
-            int transId = GetInteger("To view more details, input transfer ID #: ", 0);
-            if (transId == 0)
+            
+            int transId = GetInteger("\n\nTo view more details, input transfer ID #: ", 0);
+            
+            while (transId != 0)
             {
-                return MenuOptionResult.DoNotWaitAfterMenuSelection;
-            }
-            while (!list.ContainsKey(transId))
-            {
-                consoleServices.ErrorMessage();
+                while (!list.ContainsKey(transId))
+                {
+                    consoleServices.ErrorMessage();
+                    transId = GetInteger("To view more details, input transfer ID #: ", 0);
+                }
+
+                consoleServices.TransferDetails(list[transId], User);
                 transId = GetInteger("To view more details, input transfer ID #: ", 0);
             }
 
-            consoleServices.TransferDetails(list[transId], User);
-
-            return MenuOptionResult.WaitAfterMenuSelection;
+            return MenuOptionResult.DoNotWaitAfterMenuSelection;
         }
 
         private MenuOptionResult ViewRequests()
@@ -156,15 +156,6 @@ namespace TenmoClient.Views
 
         private MenuOptionResult RequestTEBucks()
         {
-            //Logic follows similar to SendTEBucks
-            //Sub-menu for User selection
-            //Sub-menu for account selection
-            //Input amount to request (No check-logic required)
-            //TransferApiDao requires RequestMoney method
-            //Generate transfer object and Post request (localhost:#####/transfer)
-            //Modify TransferMoney to accept transfer status id and type id 
-            //Creates new transfer object (defaults status to approved and type to sent)
-
             Transfer newTransfer = new Transfer();
             newTransfer.TransferStatusID = 1;
             newTransfer.TransferTypeID = 1;
