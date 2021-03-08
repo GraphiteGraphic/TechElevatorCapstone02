@@ -95,9 +95,9 @@ namespace TenmoClient.Views
 
         public void Jingle()
         {
-            Task.Run(() => Console.Beep(1568, 500));
-            Task.Run(() => Console.Beep(2637, 500));
-            Task.Run(() => Console.Beep(2093, 800));
+            Task.Run(() => Console.Beep(784, 500));
+            Task.Run(() => Console.Beep(1318, 500));
+            Task.Run(() => Console.Beep(1046, 800));
         }
 
         #region Console Helper Functions
