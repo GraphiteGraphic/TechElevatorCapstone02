@@ -30,7 +30,9 @@ namespace TenmoServer.DAO
 	                                                    JOIN accounts a ON a.account_id = t.account_from
 	                                                    JOIN accounts ac ON ac.account_id = t.account_to
 	                                                    JOIN users	u ON u.user_id = a.user_id
-	                                                    JOIN users	us ON us.user_id = ac.user_id", conn);
+	                                                    JOIN users	us ON us.user_id = ac.user_id
+							    	WHERE u.user_id = @user_id
+								OR us.user_id = @user_id", conn);
                     cmd.Parameters.AddWithValue("@user_id", user_id);
                     SqlDataReader reader = cmd.ExecuteReader();
 
